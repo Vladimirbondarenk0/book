@@ -38,15 +38,16 @@ jobs:
       - name: Build PDF
         run: python build.py
 
-      - name: Prepare site
+      - name: Prepare Pages
         run: |
-          mkdir site
-          cp book.pdf site/book.pdf
+          mkdir public
+          cp book.pdf public/book.pdf
+          echo "<meta http-equiv=\"refresh\" content=\"0; url=book.pdf\">" > public/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: public
 
   deploy:
     needs: build
