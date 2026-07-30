@@ -1,42 +1,67 @@
-name: Build PDF
+name: Build and Publish PDF
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install system packages
+      - name: Install WeasyPrint
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             python3-pip \
-            libcairo2 \
-            pango1.0-tools \
             libpango-1.0-0 \
-            libpangocairo-1.0-0 \
+            libcairo2 \
             libgdk-pixbuf-2.0-0 \
             libffi-dev \
             shared-mime-info
 
       - name: Install Python packages
-        run: |
-          pip install -r requirements.txt
+        run: pip install weasyprint
 
       - name: Build PDF
-        run: |
-          python build.py
+        run: python build.py
 
-      - name: Upload PDF
-        uses: actions/upload-artifact@v4
+      - name: Prepare site
+        run: |
+          mkdir site
+          cp book.pdf site/book.pdf
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: book-pdf
-          path: "*.pdf"
+          path: site
+
+  deploy:
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
