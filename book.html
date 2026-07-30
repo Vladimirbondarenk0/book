@@ -1,6 +1,4 @@
-from weasyprint import HTML
-
-html_content = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -346,11 +344,5 @@ html_content = """<!DOCTYPE html>
   </div>
 
 </body>
-</html>"""
+</html>
 
-output_filename = "book_v22_grammar_fix.pdf"
-with open("book_v22_grammar_fix.html", "w", encoding="utf-8") as f:
-    f.write(html_content)
-
-HTML("book_v22_grammar_fix.html").write_pdf(output_filename)
-print("PDF regenerated with Chapter II added.")
